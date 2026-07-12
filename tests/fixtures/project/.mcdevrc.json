@@ -45,6 +45,24 @@
                         }
                     }
                 ]
+            },
+            "eslint": {
+                "noGuidKeys": "error",
+                "noRootFolder": "error",
+                "noAmpscriptHtmlTag": "error",
+                "keySuffix": "fix",
+                "onlyCBbyKey": "error",
+                "noMidDependentCode": "error",
+                "throwsOnPurpose": "error",
+                "overrides": [
+                    {
+                        "type": ["journey"],
+                        "options": {
+                            "noGuidKeys": "off",
+                            "keySuffix": "fix"
+                        }
+                    }
+                ]
             }
         }
     },
