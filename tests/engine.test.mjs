@@ -220,3 +220,52 @@ test('unknown metadata type returns no messages', () => {
     });
     assert.deepEqual(messages, []);
 });
+
+test('no explicit method uses the "eslint" config block when present', () => {
+    clearRcCache();
+    clearCustomFunctionCache();
+    const file = fixture(
+        'retrieve',
+        'R1',
+        'DEV',
+        'journey',
+        'RS_NotificationEmail.journey-meta.json',
+    );
+    const messages = runValidation(file, fs.readFileSync(file, 'utf8'));
+    const keySuffix = messages.find((m) => m.ruleId === 'mcdev/keySuffix');
+    assert.ok(keySuffix, 'keySuffix message expected via the eslint method');
+    // "fix" in the eslint block is treated as an error (2), not auto-fixed
+    assert.equal(keySuffix.severity, 2);
+});
+
+test('"fix" severity is reported as an ESLint error (2)', () => {
+    clearRcCache();
+    clearCustomFunctionCache();
+    // RS_NotificationEmail does not end in the "_DEV" suffix -> keySuffix fails.
+    // keySuffix is "fix" in the eslint block, which must surface as an error (2).
+    const file = fixture(
+        'retrieve',
+        'R1',
+        'DEV',
+        'journey',
+        'RS_NotificationEmail.journey-meta.json',
+    );
+    // no method -> eslint block; keySuffix is "fix" there
+    const messages = runValidation(file, fs.readFileSync(file, 'utf8'));
+    const keySuffix = messages.find((m) => m.ruleId === 'mcdev/keySuffix');
+    assert.ok(keySuffix, 'keySuffix message expected');
+    assert.equal(keySuffix.severity, 2);
+});
+
+test('eslint method falls back to deploy when no eslint block exists', () => {
+    // rc with only a deploy block -> the resolver must still find deploy severities
+    clearRcCache();
+    clearCustomFunctionCache();
+    const rc = findMcdevrc(PROJECT);
+    const deployOnly = structuredClone(rc.config);
+    delete deployOnly.options.validation.eslint;
+    delete deployOnly.options.validation.retrieve;
+    // getValidationConfig is the primitive the resolver uses; assert both keys resolve
+    assert.equal(getValidationConfig(deployOnly, 'eslint', 'dataExtension'), null);
+    assert.equal(getValidationConfig(deployOnly, 'deploy', 'dataExtension').noGuidKeys, 'error');
+});

@@ -72,22 +72,37 @@ export default [
 
 ## Validation method (strictness)
 
-mcdev applies different severities per **method** (`retrieve`, `buildDefinition`, `deploy`) in `.mcdevrc.json` → `options.validation.<method>` with `type`-based overrides. This plugin defaults to **`deploy`** (the strictest, matching what blocks a deploy).
+mcdev applies different severities per **method** (`retrieve`, `buildDefinition`, `deploy`) in `.mcdevrc.json` → `options.validation.<method>` with `type`-based overrides.
 
-Select a different method with the `MCDEV_VALIDATION_METHOD` environment variable:
+This plugin reads a dedicated **`eslint`** method. If `options.validation.eslint` is **not** defined, it falls back to **`deploy`** (the strictest built-in method, matching what blocks a deploy). This lets you start with zero extra config and later tune ESLint strictness independently from your deploy gate:
 
-```bash
-# lint at "retrieve" strictness
-MCDEV_VALIDATION_METHOD=retrieve npx eslint .
+```jsonc
+{
+  "options": {
+    "validation": {
+      "deploy": {
+        "noGuidKeys": "error",
+        "keySuffix": "error"
+      },
+      // optional: overrides just for ESLint; omit this block to reuse "deploy"
+      "eslint": {
+        "noGuidKeys": "warn",
+        "keySuffix": "error"
+      }
+    }
+  }
+}
 ```
 
-Allowed values: `retrieve`, `buildDefinition`, `deploy`. Any other value falls back to `deploy`.
+Severities map to ESLint as: `error` and `fix` → error, everything else (`warn`) → warning, `off` / unset → skipped.
 
 ## CI / CD
 
+Lint only committed metadata. `deploy/` is typically git-ignored, so it will not exist in CI — point ESLint at `retrieve/`:
+
 ```bash
 # fail the pipeline on any error-severity mcdev validation
-npx eslint "retrieve/**/*-meta.json" "deploy/**/*-meta.json"
+npx eslint "retrieve/**/*-meta.json"
 ```
 
 `error`-severity rules exit non-zero; `warn`-severity rules report but do not fail unless you run ESLint with `--max-warnings 0`. Use the `MCDEV_VALIDATION_METHOD` env var to pick the strictness appropriate for the stage.
@@ -110,7 +125,7 @@ With this in place, opening a `*-meta.json` file under `retrieve/` or `deploy/` 
 | Rule outcome | ESLint result |
 | --- | --- |
 | `passed()` returns `true` | nothing |
-| `passed()` returns `false` | message with severity from `.mcdevrc.json` (`error` → error, otherwise warning) |
+| `passed()` returns `false` | message with severity from `.mcdevrc.json` (`error` or `fix` → error, otherwise warning) |
 | `passed()` returns `null` (filter) | warning: "Item would be filtered out during deploy: …" |
 | rule throws | warning (rule name + error message), never crashes the lint run |
 | severity is `off` / rule not configured | skipped |
@@ -122,7 +137,7 @@ Message rule IDs are `mcdev/<ruleName>` (e.g. `mcdev/keySuffix`, `mcdev/noGuidKe
 ## Notes
 
 - Your `.mcdev-validations.js` does **not** need any changes — it is consumed as-is with mcdev's real `Util` passed in.
-- Autofix (`fix()`) is not wired into ESLint `--fix` yet; this release is read-only validation.
+- Autofix (`fix()`) is not wired into ESLint `--fix` yet; this release is read-only validation. Because of that, a rule configured as `"fix"` in `.mcdevrc.json` is reported as an **error** (not silently auto-fixed).
 
 ## License
 

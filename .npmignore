@@ -2,5 +2,10 @@ node_modules
 tests
 coverage
 .github
+.husky
+.npmrc
+.prettierrc
+.prettierignore
+eslint.config.mjs
 *.test.js
 *.test.mjs
