@@ -1,0 +1,56 @@
+{
+    "credentials": {
+        "R1": {
+            "eid": 510004860,
+            "businessUnits": {
+                "DEV": 510007949,
+                "Randstad_EUN": 510006850
+            }
+        }
+    },
+    "options": {
+        "validation": {
+            "retrieve": {
+                "noGuidKeys": "warn",
+                "noRootFolder": "warn",
+                "noAmpscriptHtmlTag": "warn",
+                "keySuffix": "warn",
+                "onlyCBbyKey": "off",
+                "noMidDependentCode": "off",
+                "throwsOnPurpose": "error",
+                "overrides": [
+                    {
+                        "type": ["journey"],
+                        "options": {
+                            "noGuidKeys": "off",
+                            "keySuffix": "warn"
+                        }
+                    }
+                ]
+            },
+            "deploy": {
+                "noGuidKeys": "error",
+                "noRootFolder": "error",
+                "noAmpscriptHtmlTag": "error",
+                "keySuffix": "error",
+                "onlyCBbyKey": "error",
+                "noMidDependentCode": "error",
+                "throwsOnPurpose": "error",
+                "overrides": [
+                    {
+                        "type": ["journey"],
+                        "options": {
+                            "noGuidKeys": "off",
+                            "keySuffix": "error"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "directories": {
+        "retrieve": "retrieve/",
+        "deploy": "deploy/"
+    },
+    "version": "9.0.0"
+}
