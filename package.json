@@ -1,0 +1,67 @@
+{
+    "name": "eslint-plugin-mcdev",
+    "version": "0.1.0",
+    "description": "ESLint plugin that runs SFMC mcdev metadata validation rules (.mcdev-validations.js + built-in defaults) against retrieve/deploy JSON in CI and VS Code",
+    "type": "module",
+    "main": "lib/index.js",
+    "exports": {
+        ".": "./lib/index.js"
+    },
+    "files": [
+        "lib",
+        "LICENSE"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/JoernBerkefeld/eslint-plugin-mcdev.git"
+    },
+    "bugs": {
+        "url": "https://github.com/JoernBerkefeld/eslint-plugin-mcdev/issues"
+    },
+    "homepage": "https://github.com/JoernBerkefeld/eslint-plugin-mcdev#readme",
+    "author": "Joern Berkefeld",
+    "keywords": [
+        "eslint",
+        "eslintplugin",
+        "mcdev",
+        "sfmc",
+        "salesforce",
+        "marketing-cloud",
+        "validation",
+        "metadata"
+    ],
+    "peerDependencies": {
+        "eslint": ">=9.0.0",
+        "mcdev": ">=9.0.0"
+    },
+    "scripts": {
+        "test": "node --test tests/*.test.mjs",
+        "lint": "eslint .",
+        "lint:fix": "eslint --fix .",
+        "prepare": "husky || true",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "license": "MIT",
+    "engines": {
+        "node": ">=22.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "eslint": "^10.6.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-jsdoc": "^63.0.12",
+        "eslint-plugin-prettier": "^5.5.6",
+        "eslint-plugin-unicorn": "^71.1.0",
+        "globals": "^17.7.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^17.0.8",
+        "mcdev": "^9.0.3",
+        "prettier": "^3.9.4"
+    },
+    "lint-staged": {
+        "*.{js,mjs,cjs}": [
+            "eslint --fix"
+        ]
+    }
+}
