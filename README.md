@@ -105,7 +105,7 @@ Lint only committed metadata. `deploy/` is typically git-ignored, so it will not
 npx eslint "retrieve/**/*-meta.json"
 ```
 
-`error`-severity rules exit non-zero; `warn`-severity rules report but do not fail unless you run ESLint with `--max-warnings 0`. Use the `MCDEV_VALIDATION_METHOD` env var to pick the strictness appropriate for the stage.
+`error`-severity rules exit non-zero; `warn`-severity rules report but do not fail unless you run ESLint with `--max-warnings 0`. Tune per-stage strictness through `options.validation.eslint` (or `deploy`) in `.mcdevrc.json` — see [Validation method](#validation-method-strictness).
 
 ## VS Code
 
@@ -119,6 +119,31 @@ No custom extension is needed — this works through the standard **[ESLint exte
 ```
 
 With this in place, opening a `*-meta.json` file under `retrieve/` or `deploy/` surfaces mcdev validation failures inline as Problems.
+
+> If you also use the [SFMC Language extension](https://marketplace.visualstudio.com/items?itemName=joernberkefeld.sfmc-language), it already contributes an `eslint.validate` default that includes `json` — so no manual setting is needed. But note that a hand-written `eslint.validate` array in your own `settings.json` **replaces** the contributed default (VS Code does not merge them), so if you set it yourself you must include `"json"` for this plugin to run.
+
+## Using alongside eslint-plugin-sfmc
+
+[`eslint-plugin-sfmc`](https://www.npmjs.com/package/eslint-plugin-sfmc) and this plugin coexist without a processor conflict — they claim different files (`*.amp` / `*.ssjs` / `*.html` vs `*-meta.json`) and use different processor IDs.
+
+One thing to watch: mcdev retrieves asset code as sibling **`.html` / `.amp` / `.ssjs`** files inside `retrieve/`. `eslint-plugin-sfmc`'s default globs (`**/*.html`, `**/*.amp`, `**/*.ssjs`) match those retrieved files too, so it will lint mcdev's generated output — usually duplicated across BUs and not fixable in `retrieve/`. Scope `eslint-plugin-sfmc` to your authored source so it does not lint the retrieved copies:
+
+```js
+import sfmc from 'eslint-plugin-sfmc';
+import mcdev from 'eslint-plugin-mcdev';
+
+export default [
+    // eslint-plugin-sfmc: your authored source only (adjust to your layout)
+    {
+        files: ['src/**/*.{amp,ssjs,html}'],
+        // spread the sfmc rules/processor you use, e.g. ...sfmc.configs.recommended (re-scoped)
+    },
+    // eslint-plugin-mcdev: owns the retrieved/deployed metadata
+    ...mcdev.configs.recommended,
+];
+```
+
+If you prefer using `sfmc.configs.recommended` as-is (which targets `**/*.amp` etc.), add per-config `ignores: ['retrieve/**', 'deploy/**']` to the sfmc blocks. Avoid a top-level `{ ignores: ['retrieve/**'] }` object with no `files` key — that is a **global** ignore and would also disable `eslint-plugin-mcdev` on `retrieve/`.
 
 ## What gets reported
 
