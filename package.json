@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-mcdev",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "ESLint plugin that runs SFMC mcdev metadata validation rules (.mcdev-validations.js + built-in defaults) against retrieve/deploy JSON in CI and VS Code",
     "type": "module",
     "main": "lib/index.js",
