@@ -2,7 +2,25 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Linter } from 'eslint';
+import { ESLint, Linter } from 'eslint';
+
+test('repository autofix preserves starred multiline JSDoc', async () => {
+    const eslint = new ESLint({
+        cwd: fileURLToPath(new URL('..', import.meta.url)),
+        fix: true,
+    });
+    const filePath = 'lib/jsdoc-regression.js';
+    const rule = 'unicorn/no-asterisk-prefix-in-documentation-comments';
+    const config = await eslint.calculateConfigForFile(filePath);
+    assert.equal(config.rules[rule][0], 0);
+    const comment =
+        '/**\n * A representative documentation comment.\n * A second starred line.\n */';
+    const code = `${comment}\nexport const answer = 42;\n`;
+    const [result] = await eslint.lintText(code, { filePath });
+    assert.equal(result.fatalErrorCount, 0);
+    assert.ok((result.output ?? code).includes(comment));
+    assert.ok(result.messages.every((message) => message.ruleId !== rule));
+});
 import { runValidation, clearCustomFunctionCache } from '../lib/engine.js';
 import { clearRcCache } from '../lib/mcdevrc.js';
 import plugin from '../lib/index.js';
